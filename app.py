@@ -41,7 +41,7 @@ def final_score(comment, meta, clusters=None):
 
 def is_bot(score): return score >= 3
 
-def get_comments(video_id, max_results=1000):
+def get_comments(video_id, max_results=100):
     out, token = [], None
     while len(out) < max_results:
         r = youtube.commentThreads().list(part="snippet", videoId=video_id, maxResults=100, pageToken=token).execute()
