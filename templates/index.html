@@ -1,28 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Bot Checker 2.0</title>
+    <title>YouTube Bot Detector</title>
 </head>
 <body>
     <h1>Enter YouTube Video ID</h1>
-    <form id="analyze-form">
-        <input type="text" id="video_id" placeholder="e.g. dQw4w9WgXcQ">
-        <button type="submit">Analyze</button>
-    </form>
+    <input type="text" id="videoInput" placeholder="https://www.youtube.com/watch?v=...">
+    <button onclick="analyze()">Analyze</button>
     <pre id="result"></pre>
 
     <script>
-        document.getElementById("analyze-form").addEventListener("submit", async function(e) {
-            e.preventDefault();
-            const video_id = document.getElementById("video_id").value;
-            const res = await fetch("/analyze", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ video_id })
-            });
-            const data = await res.json();
-            document.getElementById("result").textContent = JSON.stringify(data, null, 2);
-        });
+        function extractVideoId(url) {
+            const regExp = /(?:v=|\/)([0-9A-Za-z_-]{11})/;
+            const match = url.match(regExp);
+            return match ? match[1] : url;
+        }
+
+        async function analyze() {
+            const input = document.getElementById("videoInput").value;
+            const video_id = extractVideoId(input);
+            const resultBox = document.getElementById("result");
+            resultBox.textContent = "Analyzing...";
+
+            try {
+                const response = await fetch("/analyze", {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify({video_id})
+                });
+
+                if (!response.ok) {
+                    throw new Error("Server error: " + response.statusText);
+                }
+
+                const data = await response.json();
+                resultBox.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                resultBox.textContent = "Error: " + e.message;
+            }
+        }
     </script>
 </body>
 </html>
